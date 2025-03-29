@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App</title>
+    <link rel="stylesheet" href="style.css"> 
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+        
+        body {
+            font-family: 'Fredoka One', cursive;
+            background: linear-gradient(135deg, #e0e0e0, #ffffff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 600px;
+            text-align: center;
+            border: 2px solid #b0b0b0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .progress {
+            font-size: 18px;
+            color: #4a4a4a;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: #4a4a4a;
+            transition: width 0.5s;
+        }
+        .todo-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .text-input, .date-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #b0b0b0;
+            font-size: 16px;
+        }
+        .add-btn {
+            background: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .add-btn:hover {
+            background: #333;
+        }
+        .task-category {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+        .task-list li {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .task-list button {
+            background: green;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List <i class="fas fa-tasks"></i></h1>
+        <div class="progress">
+            Completed Tasks: <span id="progressPercentage">0%</span>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+        <div class="todo-wrapper">
+            <textarea id="taskInput" class="text-input" placeholder="Add multiple tasks, separated by new lines..." required></textarea>
+            <input type="datetime-local" id="deadlineInput" class="date-input" required>
+            <button id="addTaskButton" class="add-btn">Add Tasks</button>
+        </div>
+        <div class="task-category" id="overdueTasks"><h2>Overdue</h2><ul class="task-list"></ul></div>
+        <div class="task-category" id="todayTasks"><h2>Today</h2><ul class="task-list"></ul></div>
+        <div class="task-category" id="tomorrowTasks"><h2>Tomorrow</h2><ul class="task-list"></ul></div>
+        <div class="task-category" id="weekTasks"><h2>This Week</h2><ul class="task-list"></ul></div>
+    </div>
+    <script>
+        let totalTasks = 0, completedTasks = 0;
+        function updateProgress() {
+            const percentage = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+            document.getElementById("progressPercentage").textContent = `${percentage}%`;
+            document.querySelector(".progress-bar-fill").style.width = `${percentage}%`;
+        }
+        document.getElementById("addTaskButton").addEventListener("click", function() {
+            const taskInput = document.getElementById("taskInput").value;
+            const deadlineInput = new Date(document.getElementById("deadlineInput").value);
+            if (taskInput.trim() === "" || isNaN(deadlineInput.getTime())) {
+                alert("Please enter at least one task and a valid deadline.");
+                return;
+            }
+            totalTasks += taskInput.split('\n').filter(task => task.trim() !== "").length;
+            updateProgress();
+            const category = deadlineInput < new Date() ? "overdueTasks" : "todayTasks";
+            const tasks = taskInput.split('\n').filter(task => task.trim() !== "");
+            const taskList = document.querySelector(`#${category} .task-list`);
+            tasks.forEach(task => {
+                const li = document.createElement("li");
+                li.innerHTML = `${task} - <small>${deadlineInput.toLocaleString()}</small> <button onclick="completeTask(this)">✔</button>`;
+                taskList.appendChild(li);
+            });
+            document.getElementById("taskInput").value = "";
+            document.getElementById("deadlineInput").value = "";
+        });
+        function completeTask(button) {
+            button.parentElement.remove();
+            completedTasks++;
+            updateProgress();
+        }
+    </script>
+</body>
+</html>
